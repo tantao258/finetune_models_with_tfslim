@@ -4,6 +4,7 @@ import sys
 import tarfile
 import numpy as np
 import tensorflow as tf
+from nets import dataset_utils
 from tensorflow.python.framework import dtypes
 from tensorflow.python.framework.ops import convert_to_tensor
 try:
@@ -135,31 +136,11 @@ class ImageDataGenerator(object):
         return img_bgr, one_hot
 
 
-def download_and_uncompress_tarball(tarball_url, dataset_dir):
-    """Downloads the `tarball_url` and uncompresses it locally.
-
-    Args:
-      tarball_url: The URL of a tarball file.
-      dataset_dir: The directory where the temporary files are stored.
-    """
-    filename = tarball_url.split('/')[-1]
-    filepath = os.path.join(dataset_dir, filename)
-
-    def _progress(count, block_size, total_size):
-        sys.stdout.write('\r>> Downloading %s %.1f%%' % (filename, float(count * block_size) / float(total_size) * 100.0))
-        sys.stdout.flush()
-    filepath, _ = urllib.request.urlretrieve(tarball_url, filepath, _progress)
-    print()
-    statinfo = os.stat(filepath)
-    print('Successfully downloaded', filename, statinfo.st_size, 'bytes.')
-    tarfile.open(filepath, 'r:gz').extractall(dataset_dir)
-
-
 def download_ckpt(url):
     target_dir = os.path.join("./pre_trained_models/")
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
-    download_and_uncompress_tarball(url, target_dir)
+    dataset_utils.download_and_uncompress_tarball(url, target_dir)
 
 
 def compute_mean(train_path="./data/train.txt", validation_path="./data/validation.txt"):
@@ -170,7 +151,7 @@ def compute_mean(train_path="./data/train.txt", validation_path="./data/validati
             for line in f:
                 img = cv2.imread(line.split(" ")[0])
                 img = img.astype(np.float32)
-                imgs_mean += np.array([np.mean(img[:, :, 2]), np.mean(img[:, :, 1]), np.mean(img[:, :, 0])])
+                imgs_mean += np.array([np.mean(img[:, :, 2]), np.mean(img[:, :, 1]), np.mean(img[:, :, 0])])  # BGR -> RGB
                 count += 1
     IMAGES_MEAN = imgs_mean / count
     print(IMAGES_MEAN)
