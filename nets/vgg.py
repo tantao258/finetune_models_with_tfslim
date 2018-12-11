@@ -300,8 +300,6 @@ def vgg_19(inputs,
                 end_points[sc.name + '/fc8'] = net
             return net, end_points
 
-
-vgg_16.default_image_size = 224
 vgg_19.default_image_size = 224
 
 # Alias
