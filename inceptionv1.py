@@ -1,4 +1,3 @@
-import os
 import tensorflow as tf
 from nets import inception
 from tensorflow.python import pywrap_tensorflow
@@ -7,8 +6,10 @@ from tensorflow.contrib.slim import arg_scope
 
 class InceptionV1(object):
     def __init__(self, num_classes, train_layers=None, learning_rate=0.001, model="train", weights_path='DEFAULT'):
+
         """Create the graph of the inceptionv1 model.
         """
+
         # Parse input arguments into class variables
         if weights_path == 'DEFAULT':
             self.WEIGHTS_PATH = "./pre_trained_models/inception_v1.ckpt"
@@ -34,12 +35,15 @@ class InceptionV1(object):
             self.loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=self.logits, labels=self.y_input))
 
         with tf.name_scope("train"):
+
             self.global_step = tf.Variable(0, name="global_step", trainable=False)
             update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+
             var_list = [v for v in tf.trainable_variables() if v.name.split('/')[-2] in train_layers or v.name.split('/')[-3] in train_layers ]
             gradients = tf.gradients(self.loss, var_list)
             self.grads_and_vars = list(zip(gradients, var_list))
             optimizer = tf.train.GradientDescentOptimizer(learning_rate)
+
             with tf.control_dependencies(update_ops):
                 self.train_op = optimizer.apply_gradients(grads_and_vars=self.grads_and_vars, global_step=self.global_step)
 

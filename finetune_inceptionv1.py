@@ -14,7 +14,6 @@ Configuration Part.
 # Parameters
 tf.app.flags.DEFINE_string("train_file", './data/train.txt', "the path of train data")
 tf.app.flags.DEFINE_string("val_file", './data/validation.txt', "the path of val data")
-tf.app.flags.DEFINE_string("checkpoints_dir", './checkpoints', "checkpoints_dir")
 tf.app.flags.DEFINE_float("learning_rate", 0.001, "learn_rate(default:0.001)")
 tf.app.flags.DEFINE_integer("num_epochs", 50, "num_epoches(default:10)")
 tf.app.flags.DEFINE_integer("batch_size", 128, "batch_size(default:128)")
@@ -88,10 +87,11 @@ with tf.Session() as sess:
 
     sess.run(tf.global_variables_initializer())
 
-    # Load the pretrained weights into the non-trainable layer
+    # Load the pre_trained weights into the non-trainable layer
     if "inception_v1.ckpt" not in os.listdir("./pre_trained_models/"):
         print(" ")
         download_ckpt(url="http://download.tensorflow.org/models/inception_v1_2016_08_28.tar.gz")
+
     inceptionv1.load_initial_weights(sess)
     print("run the tensorboard in terminal: \ntensorboard --logdir={} --port=6006 \n".format(out_dir))
 
