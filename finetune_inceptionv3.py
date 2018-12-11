@@ -2,6 +2,7 @@ import os
 import time
 import datetime
 import tensorflow as tf
+from nets import inception
 from inceptionv3 import InceptionV3
 from utils import ImageDataGenerator
 from utils import download_ckpt
@@ -35,13 +36,17 @@ with tf.device('/cpu:0'):
                                         mode='training',
                                         batch_size=FLAGS.batch_size,
                                         num_classes=FLAGS.num_classes,
-                                        shuffle=True)
+                                        shuffle=True,
+                                        img_out_size=inception.inception_v3.default_image_size
+                                        )
 
     val_iterator = ImageDataGenerator(txt_file=FLAGS.val_file,
                                       mode='inference',
                                       batch_size=FLAGS.batch_size,
                                       num_classes=FLAGS.num_classes,
-                                      shuffle=False)
+                                      shuffle=False,
+                                      img_out_size=inception.inception_v3.default_image_size
+                                      )
 
     train_next_batch = train_iterator.iterator.get_next()
     val_next_batch = val_iterator.iterator.get_next()
@@ -95,7 +100,6 @@ with tf.Session() as sess:
     inceptionv3.load_initial_weights(sess)
     print("run the tensorboard in terminal: \ntensorboard --logdir={} --port=6006 \n".format(out_dir))
 
-    exit()
     while True:
         # train loop
         x_batch_train, y_batch_train = sess.run(train_next_batch)
@@ -133,9 +137,3 @@ with tf.Session() as sess:
         # break conditon
         #if accuracy > 0.95:
         #exit()
-
-
-
-
-
-

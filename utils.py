@@ -15,7 +15,7 @@ IMAGENET_MEAN = tf.constant([121.55213, 113.84197, 99.5037], dtype=tf.float32)
 
 
 class ImageDataGenerator(object):
-    def __init__(self, txt_file, mode, batch_size, num_classes, shuffle=True, buffer_size=1000):
+    def __init__(self, txt_file, mode, batch_size, num_classes, shuffle=True, buffer_size=1000, img_out_size=224):
         """Create a new ImageDataGenerator.
         Recieves a path string to a text file, which consists of many lines,
         where each line has first a path string to an image and seperated by
@@ -48,6 +48,9 @@ class ImageDataGenerator(object):
         # initial shuffling of the file and label lists (together!)
         if shuffle:
             self._shuffle_lists()
+
+        # the resize img
+        self.img_out_size = img_out_size
 
         # convert lists to TF tensor
         self.img_paths = convert_to_tensor(self.img_paths, dtype=dtypes.string)
@@ -106,7 +109,7 @@ class ImageDataGenerator(object):
         # load and preprocess the image
         img_string = tf.read_file(filename)
         img_decoded = tf.image.decode_png(img_string, channels=3)
-        img_resized = tf.image.resize_images(img_decoded, [224, 224])
+        img_resized = tf.image.resize_images(img_decoded, [self.img_out_size, self.img_out_size])
         """
         Dataaugmentation comes here.
         """
@@ -125,7 +128,7 @@ class ImageDataGenerator(object):
         # load and preprocess the image
         img_string = tf.read_file(filename)
         img_decoded = tf.image.decode_png(img_string, channels=3)
-        img_resized = tf.image.resize_images(img_decoded, [224, 224])
+        img_resized = tf.image.resize_images(img_decoded, [self.img_out_size, self.img_out_size])
         img_centered = tf.subtract(img_resized, IMAGENET_MEAN)
 
         # RGB -> BGR
