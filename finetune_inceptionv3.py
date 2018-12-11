@@ -95,6 +95,7 @@ with tf.Session() as sess:
     inceptionv3.load_initial_weights(sess)
     print("run the tensorboard in terminal: \ntensorboard --logdir={} --port=6006 \n".format(out_dir))
 
+    exit()
     while True:
         # train loop
         x_batch_train, y_batch_train = sess.run(train_next_batch)

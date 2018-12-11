@@ -69,11 +69,14 @@ class InceptionV2(object):
             if op_name == "global_step":
                 continue
 
-            for layer in self.train_layers:
-                if layer not in op_name:
-                    with tf.variable_scope("/".join(op_name.split("/")[0:-1]), reuse=True):
+            op_name_list = op_name.split("/")
+            # 判断两个列表是否有交集
+            if len([item for item in op_name_list if item in self.train_layers]) != 0:
+                continue
 
-                        data = reader.get_tensor(op_name)
+            with tf.variable_scope("/".join(op_name.split("/")[0:-1]), reuse=True):
 
-                        var = tf.get_variable(op_name.split("/")[-1], trainable=False)
-                        session.run(var.assign(data))
+                data = reader.get_tensor(op_name)
+
+                var = tf.get_variable(op_name.split("/")[-1], trainable=False)
+                session.run(var.assign(data))
