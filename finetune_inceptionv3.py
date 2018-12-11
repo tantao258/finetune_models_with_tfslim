@@ -88,7 +88,7 @@ with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
 
     # Load the pre_trained weights into the non-trainable layer
-    if "inception_v1.ckpt" not in os.listdir("./pre_trained_models/"):
+    if "inception_v3.ckpt" not in os.listdir("./pre_trained_models/"):
         print(" ")
         download_ckpt(url="http://download.tensorflow.org/models/inception_v1_2016_08_28.tar.gz")
 
