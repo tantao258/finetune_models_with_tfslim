@@ -4,32 +4,32 @@ from tensorflow.python import pywrap_tensorflow
 from tensorflow.contrib.slim import arg_scope
 
 
-class InceptionV2(object):
+class InceptionV3(object):
     def __init__(self, num_classes, train_layers=None, learning_rate=0.001, model="train", weights_path='DEFAULT'):
 
-        """Create the graph of the inceptionv2 model.
+        """Create the graph of the inceptionv3 model.
         """
 
         # Parse input arguments into class variables
         if weights_path == 'DEFAULT':
-            self.WEIGHTS_PATH = "./pre_trained_models/inception_v2.ckpt"
+            self.WEIGHTS_PATH = "./pre_trained_models/inception_v3.ckpt"
         else:
             self.WEIGHTS_PATH = weights_path
         self.train_layers = train_layers
 
         with tf.variable_scope("input"):
-            self.image_size = inception.inception_v2.default_image_size
+            self.image_size = inception.inception_v3.default_image_size
             self.x_input = tf.placeholder(tf.float32, [None, self.image_size, self.image_size, 3], name="x_input")
             self.y_input = tf.placeholder(tf.float32, [None, num_classes], name="y_input")
             self.keep_prob = tf.placeholder(tf.float32, name="keep_prob")
 
         if model == "train" or model == "val":
-            with arg_scope(inception.inception_v2_arg_scope()):
-                self.logits, _ = inception.inception_v2(self.x_input, num_classes=num_classes, is_training=True)
+            with arg_scope(inception.inception_v3_arg_scope()):
+                self.logits, _ = inception.inception_v3(self.x_input, num_classes=num_classes, is_training=True)
 
         if model == "test":
-            with arg_scope(inception.inception_v2_arg_scope()):
-                self.logits, _ = inception.inception_v2(self.x_input, num_classes=num_classes, is_training=False)
+            with arg_scope(inception.inception_v3_arg_scope()):
+                self.logits, _ = inception.inception_v3(self.x_input, num_classes=num_classes, is_training=False)
 
         with tf.name_scope("loss"):
             self.loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=self.logits, labels=self.y_input))
