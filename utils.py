@@ -165,8 +165,11 @@ def _load_initial_weights(session, weightPath, train_layers):
 
         except ValueError:
 
-            if op_name not in tf.global_variables():
-                print("Don't be loaded: {}, cause: {}".format(op_name, "new model no need this variable."))
+            for var in tf.global_variables():
+                if op_name not in str(var):
+                    print("Don't be loaded: {}, cause: {}".format(op_name, "new model no need this variable."))
+                else:
+                    print("Don't be loaded: {}, cause: {}".format(op_name, ValueError))
 
 
 def download_ckpt(url):
