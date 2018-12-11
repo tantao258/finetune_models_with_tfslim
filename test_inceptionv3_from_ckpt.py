@@ -1,7 +1,7 @@
 import os
 import tensorflow as tf
 from nets import inception
-from inceptionv3 import InceptionV3
+from model_inceptionv3 import InceptionV3
 from utils import ImageDataGenerator
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '0,1,2,3'

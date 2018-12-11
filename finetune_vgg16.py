@@ -3,7 +3,7 @@ import time
 import datetime
 import tensorflow as tf
 from nets import vgg
-from vgg16 import Vgg16
+from model_vgg16 import Vgg16
 from utils import ImageDataGenerator
 from utils import download_ckpt
 

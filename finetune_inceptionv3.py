@@ -3,7 +3,7 @@ import time
 import datetime
 import tensorflow as tf
 from nets import inception
-from inceptionv3 import InceptionV3
+from model_inceptionv3 import InceptionV3
 from utils import ImageDataGenerator
 from utils import download_ckpt
 

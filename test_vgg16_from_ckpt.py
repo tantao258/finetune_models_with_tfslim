@@ -1,7 +1,7 @@
 import os
 import tensorflow as tf
 from nets import vgg
-from vgg16 import Vgg16
+from model_vgg16 import Vgg16
 from utils import ImageDataGenerator
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '0,1,2,3'
