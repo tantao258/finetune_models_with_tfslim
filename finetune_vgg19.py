@@ -61,7 +61,7 @@ vgg19 = Vgg19(num_classes=FLAGS.num_classes,
 
 with tf.Session() as sess:
     timestamp = str(int(time.time()))
-    out_dir = os.path.abspath(os.path.join(os.path.curdir, "runs", "vgg16", timestamp))
+    out_dir = os.path.abspath(os.path.join(os.path.curdir, "runs", "vgg19", timestamp))
     print("Writing to {}\n".format(out_dir))
 
     # define summary
