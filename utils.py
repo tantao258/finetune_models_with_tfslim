@@ -4,6 +4,7 @@ import numpy as np
 import tensorflow as tf
 from nets import dataset_utils
 from tensorflow.python.framework import dtypes
+from tensorflow.python import pywrap_tensorflow
 from tensorflow.python.framework.ops import convert_to_tensor
 try:
     import urllib2 as urllib
@@ -135,6 +136,30 @@ class ImageDataGenerator(object):
         # img_bgr = img_centered[:, :, ::-1]
 
         return img_centered, one_hot
+
+
+def _load_initial_weights(session, weightPath, train_layers):
+    reader = pywrap_tensorflow.NewCheckpointReader(weightPath)
+
+    # Load the weights into memory
+    var_to_shape_map = reader.get_variable_to_shape_map()
+
+    for op_name in var_to_shape_map:
+        # Do not load variable: global_step for finetuning
+        if op_name == "global_step":
+            continue
+
+        op_name_list = op_name.split("/")
+        # 判断两个列表是否有交集
+        if len([item for item in op_name_list if item in train_layers]) != 0:
+            continue
+
+        with tf.variable_scope("/".join(op_name.split("/")[0:-1]), reuse=True):
+
+            data = reader.get_tensor(op_name)
+
+            var = tf.get_variable(op_name.split("/")[-1], trainable=False)
+            session.run(var.assign(data))
 
 
 def download_ckpt(url):

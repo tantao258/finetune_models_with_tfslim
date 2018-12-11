@@ -92,11 +92,15 @@ with tf.Session() as sess:
 
     sess.run(tf.global_variables_initializer())
 
+    # for k in tf.global_variables():
+    #     print(k)
+    # exit()
+
     # Load the pre_trained weights into the non-trainable layer
     if "vgg_16.ckpt" not in os.listdir("./pre_trained_models/"):
         print(" ")
         download_ckpt(url="http://download.tensorflow.org/models/vgg_16_2016_08_28.tar.gz")
-
+    exit()
     vgg16.load_initial_weights(sess)
     print("run the tensorboard in terminal: \ntensorboard --logdir={} --port=6006 \n".format(out_dir))
 

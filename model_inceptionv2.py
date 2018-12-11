@@ -1,6 +1,6 @@
 import tensorflow as tf
 from nets import inception
-from tensorflow.python import pywrap_tensorflow
+from utils import _load_initial_weights
 from tensorflow.contrib.slim import arg_scope
 
 
@@ -58,25 +58,6 @@ class InceptionV2(object):
             self.accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"), name="accuracy")
 
     def load_initial_weights(self, session):
-
-        reader = pywrap_tensorflow.NewCheckpointReader(self.WEIGHTS_PATH)
-
-        # Load the weights into memory
-        var_to_shape_map = reader.get_variable_to_shape_map()
-
-        for op_name in var_to_shape_map:
-            # Do not load variable: global_step for finetuning
-            if op_name == "global_step":
-                continue
-
-            op_name_list = op_name.split("/")
-            # 判断两个列表是否有交集
-            if len([item for item in op_name_list if item in self.train_layers]) != 0:
-                continue
-
-            with tf.variable_scope("/".join(op_name.split("/")[0:-1]), reuse=True):
-
-                data = reader.get_tensor(op_name)
-
-                var = tf.get_variable(op_name.split("/")[-1], trainable=False)
-                session.run(var.assign(data))
+        _load_initial_weights(session=session,
+                              weightPath=self.WEIGHTS_PATH,
+                              train_layers=self.train_layers)
