@@ -12,7 +12,7 @@ class Vgg16(object):
 
         # Parse input arguments into class variables
         if weights_path == 'DEFAULT':
-            self.WEIGHTS_PATH = "./pre_trained_models/vgg16.ckpt"
+            self.WEIGHTS_PATH = "./pre_trained_models/vgg_16.ckpt"
         else:
             self.WEIGHTS_PATH = weights_path
         self.train_layers = train_layers
