@@ -43,7 +43,7 @@ with tf.Session() as sess:
     saver.restore(sess, model_file)
 
     x_batch_test, y_batch_test = sess.run(test_next_batch)
-    accuracy = sess.run(vgg16.accuracy, feed_dict={vgg19.x_input: x_batch_test,
+    accuracy = sess.run(vgg19.accuracy, feed_dict={vgg19.x_input: x_batch_test,
                                                    vgg19.y_input: y_batch_test,
                                                    vgg19.keep_prob: FLAGS.test_keep_prob
                                                    }
