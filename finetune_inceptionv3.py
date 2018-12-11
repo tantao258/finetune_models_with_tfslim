@@ -23,7 +23,7 @@ tf.app.flags.DEFINE_integer("evaluate_every", 200, "Evaluate model on dev set af
 tf.app.flags.DEFINE_integer("checkpoint_every", 400, "Save model after this many steps (default: 100)")
 tf.app.flags.DEFINE_integer("num_checkpoints", 3, "num_checkpoints(default:3)")
 FLAGS = tf.app.flags.FLAGS
-train_layers = ["Conv2d_1c_1x1"]
+train_layers = ["Conv2d_1c_1x1", "Conv2d_2b_1x1"]
 
 """
 Main Part of the finetuning Script.
