@@ -1,6 +1,6 @@
 import os
 import tensorflow as tf
-from inceptionv1 import InceptionV1
+from inceptionv2 import InceptionV2
 from utils import ImageDataGenerator
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '0,1,2,3'
@@ -14,7 +14,7 @@ tf.app.flags.DEFINE_integer("batch_size", 128, "batch_size(default:128)")
 tf.app.flags.DEFINE_integer("num_classes", 5, "num_classes(default:2)")
 tf.app.flags.DEFINE_float("test_keep_prob", 1.0, "test_dropout_keep_rate(default:1.0)")
 FLAGS = tf.app.flags.FLAGS
-train_layers = ["Conv2d_0c_1x1"]
+train_layers = ["Conv2d_1c_1x1"]
 
 # Load data on the cpu
 print("Loading data...")
@@ -28,7 +28,7 @@ with tf.device('/cpu:0'):
 
 
 # Initialize model
-inceptionv1 = InceptionV1(num_classes=FLAGS.num_classes, train_layers=train_layers, model="test")
+inceptionv2 = InceptionV2(num_classes=FLAGS.num_classes, train_layers=train_layers, model="test")
 
 
 with tf.Session() as sess:
@@ -40,9 +40,9 @@ with tf.Session() as sess:
     saver.restore(sess, model_file)
 
     x_batch_test, y_batch_test = sess.run(test_next_batch)
-    accuracy = sess.run(inceptionv1.accuracy, feed_dict={inceptionv1.x_input: x_batch_test,
-                                                         inceptionv1.y_input: y_batch_test,
-                                                         inceptionv1.keep_prob: FLAGS.test_keep_prob
+    accuracy = sess.run(inceptionv2.accuracy, feed_dict={inceptionv2.x_input: x_batch_test,
+                                                         inceptionv2.y_input: y_batch_test,
+                                                         inceptionv2.keep_prob: FLAGS.test_keep_prob
                                                          }
                         )
     print(accuracy)
