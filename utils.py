@@ -1,7 +1,5 @@
 import os
 import cv2
-import sys
-import tarfile
 import numpy as np
 import tensorflow as tf
 from nets import dataset_utils
@@ -108,16 +106,16 @@ class ImageDataGenerator(object):
         # load and preprocess the image
         img_string = tf.read_file(filename)
         img_decoded = tf.image.decode_png(img_string, channels=3)
-        img_resized = tf.image.resize_images(img_decoded, [224, 224])   # RGB format
+        img_resized = tf.image.resize_images(img_decoded, [224, 224])
         """
         Dataaugmentation comes here.
         """
         img_centered = tf.subtract(img_resized, IMAGENET_MEAN)
 
         # RGB -> BGR
-        img_bgr = img_centered[:, :, ::-1]
+        # img_bgr = img_centered[:, :, ::-1]
 
-        return img_bgr, one_hot
+        return img_centered, one_hot
 
     def _parse_function_inference(self, filename, label):
         """Input parser for samples of the validation/test set."""
