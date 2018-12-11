@@ -1,5 +1,6 @@
 import os
 import tensorflow as tf
+from nets import inception
 from inceptionv1 import InceptionV1
 from utils import ImageDataGenerator
 
@@ -23,7 +24,9 @@ with tf.device('/cpu:0'):
                                        mode='inference',
                                        batch_size=FLAGS.batch_size,
                                        num_classes=FLAGS.num_classes,
-                                       shuffle=True)
+                                       shuffle=True,
+                                       img_out_size=inception.inception_v1.default_image_size
+                                       )
     test_next_batch = test_iterator.iterator.get_next()
 
 
