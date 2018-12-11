@@ -15,7 +15,7 @@ tf.app.flags.DEFINE_integer("batch_size", 128, "batch_size(default:128)")
 tf.app.flags.DEFINE_integer("num_classes", 5, "num_classes(default:2)")
 tf.app.flags.DEFINE_float("test_keep_prob", 1.0, "test_dropout_keep_rate(default:1.0)")
 FLAGS = tf.app.flags.FLAGS
-train_layers = ["Conv2d_1c_1x1"]
+train_layers = ["Logits", "Aux_logits"]
 
 # Load data on the cpu
 print("Loading data...")
