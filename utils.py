@@ -154,12 +154,19 @@ def _load_initial_weights(session, weightPath, train_layers):
         if len([item for item in op_name_list if item in train_layers]) != 0:
             continue
 
-        with tf.variable_scope("/".join(op_name.split("/")[0:-1]), reuse=True):
+        try:
 
-            data = reader.get_tensor(op_name)
+            with tf.variable_scope("/".join(op_name.split("/")[0:-1]), reuse=True):
 
-            var = tf.get_variable(op_name.split("/")[-1], trainable=False)
-            session.run(var.assign(data))
+                data = reader.get_tensor(op_name)
+
+                var = tf.get_variable(op_name.split("/")[-1], trainable=False)
+                session.run(var.assign(data))
+
+        except ValueError:
+
+            if op_name not in tf.global_variables():
+                print("Don't be loaded: {}, cause: {}".format(op_name, "new model no need this variable."))
 
 
 def download_ckpt(url):
