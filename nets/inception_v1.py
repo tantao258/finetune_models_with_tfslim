@@ -304,6 +304,8 @@ def inception_v1(inputs,
     with tf.variable_scope(scope, 'InceptionV1', [inputs], reuse=reuse) as scope:
         with slim.arg_scope([slim.batch_norm, slim.dropout],
                             is_training=is_training):
+            from tensorflow.contrib.slim import batch_norm
+
             net, end_points = inception_v1_base(inputs, scope=scope)
             with tf.variable_scope('Logits'):
                 if global_pool:

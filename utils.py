@@ -13,7 +13,7 @@ except ImportError:
     import urllib.request as urllib
 
 
-IMAGENET_MEAN = tf.constant([121.55213, 113.84197, 99.50372], dtype=tf.float32)
+IMAGENET_MEAN = tf.constant([121.55213, 113.84197, 99.5037], dtype=tf.float32)
 
 
 class ImageDataGenerator(object):
@@ -112,7 +112,7 @@ class ImageDataGenerator(object):
         """
         Dataaugmentation comes here.
         """
-        img_centered = tf.subtract(img_resized, IMAGENET_MEAN)  # IMAGENET_MEAN format: RGB
+        img_centered = tf.subtract(img_resized, IMAGENET_MEAN)
 
         # RGB -> BGR
         img_bgr = img_centered[:, :, ::-1]
@@ -131,9 +131,9 @@ class ImageDataGenerator(object):
         img_centered = tf.subtract(img_resized, IMAGENET_MEAN)
 
         # RGB -> BGR
-        img_bgr = img_centered[:, :, ::-1]
+        # img_bgr = img_centered[:, :, ::-1]
 
-        return img_bgr, one_hot
+        return img_centered, one_hot
 
 
 def download_ckpt(url):
@@ -149,9 +149,9 @@ def compute_mean(train_path="./data/train.txt", validation_path="./data/validati
     for filepath in [train_path, validation_path]:
         with open(filepath, "r", encoding="utf-8") as f:
             for line in f:
-                img = cv2.imread(line.split(" ")[0])
+                img = cv2.cvtColor(cv2.imread(line.split(" ")[0]), cv2.COLOR_BGR2RGB)
                 img = img.astype(np.float32)
-                imgs_mean += np.array([np.mean(img[:, :, 2]), np.mean(img[:, :, 1]), np.mean(img[:, :, 0])])  # BGR -> RGB
+                imgs_mean += np.array([np.mean(img[:, :, 0]), np.mean(img[:, :, 1]), np.mean(img[:, :, 2])])
                 count += 1
     IMAGES_MEAN = imgs_mean / count
     print(IMAGES_MEAN)
