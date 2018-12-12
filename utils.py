@@ -139,6 +139,8 @@ class ImageDataGenerator(object):
 
 
 def _load_initial_weights(session, weightPath, train_layers):
+    print("parameters loading ...")
+
     reader = pywrap_tensorflow.NewCheckpointReader(weightPath)
 
     # Load the weights into memory
