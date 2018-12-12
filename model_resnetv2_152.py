@@ -29,7 +29,7 @@ class ResNetv2_152(object):
 
         if model == "test":
             with arg_scope(resnet_v2.resnet_arg_scope()):
-                self.logits, _ = resnet_v2.resnet_v1_152(self.x_input, num_classes=num_classes, is_training=False)
+                self.logits, _ = resnet_v2.resnet_v2_152(self.x_input, num_classes=num_classes, is_training=False)
 
         with tf.name_scope("loss"):
             self.loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=self.logits, labels=self.y_input))
