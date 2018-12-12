@@ -46,7 +46,7 @@ with tf.Session() as sess:
     accuracy = sess.run(resnetv1_50.accuracy, feed_dict={resnetv1_50.x_input: x_batch_test,
                                                          resnetv1_50.y_input: y_batch_test,
                                                          resnetv1_50.keep_prob: FLAGS.test_keep_prob
-                                                   }
+                                                         }
                         )
     print(accuracy)
 
