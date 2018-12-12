@@ -135,5 +135,5 @@ with tf.Session() as sess:
             print("Saved model checkpoint to {}\n".format(path))
 
         # break conditon
-        #if accuracy > 0.95:
-        #exit()
+        if current_step > 800:
+            exit()
