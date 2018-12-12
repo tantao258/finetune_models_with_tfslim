@@ -165,11 +165,12 @@ def _load_initial_weights(session, weightPath, train_layers):
 
         except ValueError:
 
-            for var in tf.global_variables():
-                if op_name not in str(var):
-                    print("Don't be loaded: {}, cause: {}".format(op_name, "new model no need this variable."))
-                else:
-                    print("Don't be loaded: {}, cause: {}".format(op_name, ValueError))
+            tmp1 = list(op_name in str(item) for item in tf.global_variables())
+            tmp2 = np.sum([int(item) for item in tmp1])
+            if tmp2 == 0:
+                print("Don't be loaded: {}, cause: {}".format(op_name, "new model no need this variable."))
+            else:
+                print("Don't be loaded: {}, cause: {}".format(op_name, ValueError))
 
 
 def download_ckpt(url):
