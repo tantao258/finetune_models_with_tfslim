@@ -1,7 +1,7 @@
 import os
 import tensorflow as tf
 from nets import resnet_v1
-from model_resnetv1_101 import ResNetv1_101
+from model_resnetv1_152 import ResNetv1_152
 from utils import ImageDataGenerator
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '0,1,2,3'
@@ -25,13 +25,13 @@ with tf.device('/cpu:0'):
                                        batch_size=FLAGS.batch_size,
                                        num_classes=FLAGS.num_classes,
                                        shuffle=True,
-                                       img_out_size=resnet_v1.resnet_v1_101.default_image_size
+                                       img_out_size=resnet_v1.resnet_v1_152.default_image_size
                                        )
     test_next_batch = test_iterator.iterator.get_next()
 
 
 # Initialize model
-resnetv1_101 = ResNetv1_101(num_classes=FLAGS.num_classes, train_layers=train_layers, model="test")
+resnetv1_152 = ResNetv1_152(num_classes=FLAGS.num_classes, train_layers=train_layers, model="test")
 
 
 with tf.Session() as sess:
@@ -39,13 +39,13 @@ with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
 
     saver = tf.train.Saver(var_list=tf.global_variables())
-    model_file = tf.train.latest_checkpoint("./runs/resnetv1_101/1544518158/ckpt/")
+    model_file = tf.train.latest_checkpoint("./runs/resnetv1_152/1544518158/ckpt/")
     saver.restore(sess, model_file)
 
     x_batch_test, y_batch_test = sess.run(test_next_batch)
-    accuracy = sess.run(resnetv1_101.accuracy, feed_dict={resnetv1_101.x_input: x_batch_test,
-                                                          resnetv1_101.y_input: y_batch_test,
-                                                          resnetv1_101.keep_prob: FLAGS.test_keep_prob
+    accuracy = sess.run(resnetv1_152.accuracy, feed_dict={resnetv1_152.x_input: x_batch_test,
+                                                          resnetv1_152.y_input: y_batch_test,
+                                                          resnetv1_152.keep_prob: FLAGS.test_keep_prob
                                                           }
                         )
     print(accuracy)
