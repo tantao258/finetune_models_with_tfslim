@@ -28,30 +28,27 @@ slim = tf.contrib.slim
 def densenet_base(inputs,
                   growth_rate_k=32,
                   block_list=[6, 12, 32, 32],
-                  scope='DenseNet',
                   bc_mode=False,
                   reduction=1.0,
                   ):
 
-    with tf.variable_scope(scope, 'DenseNet', [inputs]):
-        with slim.arg_scope([slim.conv2d, slim.max_pool2d], stride=1, padding='SAME'):
+    with slim.arg_scope([slim.conv2d, slim.max_pool2d], stride=1, padding='SAME'):
 
-            net = slim.conv2d(inputs, growth_rate_k * 2, [7, 7], stride=2, scope="con_1")
+        net = slim.conv2d(inputs, growth_rate_k * 2, [7, 7], stride=2, scope="con_1")
 
-            net = slim.max_pool2d(net, [3, 3], stride=2, scope="pool_1")
-            from tensorflow.contrib.slim import conv2d
+        net = slim.max_pool2d(net, [3, 3], stride=2, scope="pool_1")
 
-            for i, layer_num in enumerate(block_list, start=1):
+        for i, layer_num in enumerate(block_list, start=1):
 
-                with tf.variable_scope("Block_%d" % i):
-                    net = add_block(net, growth_rate_k, layer_num, bc_mode)
+            with tf.variable_scope("Block_%d" % i):
+                net = add_block(net, growth_rate_k, layer_num, bc_mode)
 
-                # last block exist without transition layer
-                if i != len(block_list) - 1:
-                    with tf.variable_scope("Transition_%d" % i):
-                        net = transition_layer(net, reduction)
+            # last block exist without transition layer
+            if i != len(block_list) - 1:
+                with tf.variable_scope("Transition_%d" % i):
+                    net = transition_layer(net, reduction)
 
-            return net
+        return net
 
 
 def add_block(_input, growth_rate_k, num_layer, bc_mode):
@@ -126,7 +123,7 @@ def densenet_169(inputs,
     with tf.variable_scope(scope, 'DenseNet_169', [inputs], reuse=reuse) as scope:
         with slim.arg_scope([slim.batch_norm], is_training=is_training):
             with slim.arg_scope([slim.dropout], keep_prob=dropout_keep_prob):
-                net = densenet_base(inputs, growth_rate_k=32, block_list=[6, 12, 32, 32], scope=scope, bc_mode=True)
+                net = densenet_base(inputs, growth_rate_k=32, block_list=[6, 12, 32, 32], bc_mode=True)
 
                 net = slim.batch_norm(net)
                 net = tf.nn.relu(net)

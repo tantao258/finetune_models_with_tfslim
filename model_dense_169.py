@@ -26,19 +26,19 @@ class DenseNet_169(object):
 
         if model == "train" or model == "val":
             with arg_scope(densenet.densenet_169_arg_scope()):
-                self.logits, _ = densenet.densenet_169(self.x_input,
-                                                       num_classes=num_classes,
-                                                       is_training=True,
-                                                       dropout_keep_prob=self.keep_prob
-                                                       )
+                self.logits = densenet.densenet_169(self.x_input,
+                                                    num_classes=num_classes,
+                                                    is_training=True,
+                                                    dropout_keep_prob=self.keep_prob
+                                                    )
 
         if model == "test":
             with arg_scope(densenet.densenet_169_arg_scope()):
-                self.logits, _ = densenet.densenet_169(self.x_input,
-                                                       num_classes=num_classes,
-                                                       is_training=False,
-                                                       dropout_keep_prob=self.keep_prob
-                                                       )
+                self.logits = densenet.densenet_169(self.x_input,
+                                                    num_classes=num_classes,
+                                                    is_training=False,
+                                                    dropout_keep_prob=self.keep_prob
+                                                    )
 
         with tf.name_scope("loss"):
             self.loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=self.logits, labels=self.y_input))
