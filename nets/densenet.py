@@ -28,55 +28,30 @@ slim = tf.contrib.slim
 def densenet_base(inputs,
                   growth_rate_k=32,
                   block_list=[6, 12, 32, 32],
-                  final_endpoint="",
                   scope='DenseNet',
                   bc_mode=False,
                   reduction=1.0,
                   ):
-    """Defines the DenseNet base architecture."""
 
-    end_points = {}
     with tf.variable_scope(scope, 'DenseNet', [inputs]):
         with slim.arg_scope([slim.conv2d, slim.max_pool2d], stride=1, padding='SAME'):
 
-            end_point = 'Conv2d_1a_7x7'
-            net = slim.conv2d(inputs, growth_rate_k * 2, [7, 7], stride=2, scope=end_point)
-            end_points[end_point] = net
-            if final_endpoint == end_point:
-                return net, end_points
+            net = slim.conv2d(inputs, growth_rate_k * 2, [7, 7], stride=2, scope="con_1")
 
-            end_point = 'MaxPool_1b_3x3'
-            net = slim.max_pool2d(net, [3, 3], stride=2, scope=end_point)
-            end_points[end_point] = net
-            if final_endpoint == end_point:
-                return net, end_points
+            net = slim.max_pool2d(net, [3, 3], stride=2, scope="pool_1")
+            from tensorflow.contrib.slim import conv2d
 
             for i, layer_num in enumerate(block_list, start=1):
 
                 with tf.variable_scope("Block_%d" % i):
-                    end_point = 'Bolck_%d' % i
-
                     net = add_block(net, growth_rate_k, layer_num, bc_mode)
-
-                    end_points[end_point] = net
-                    if final_endpoint == end_point:
-                        return net, end_points
 
                 # last block exist without transition layer
                 if i != len(block_list) - 1:
-                    with tf.variable_scope("Transition_after_block_%d" % i):
-                        end_point = "Transition_after_block_%d" % i
-
+                    with tf.variable_scope("Transition_%d" % i):
                         net = transition_layer(net, reduction)
 
-                        end_points[end_point] = net
-                        if final_endpoint == end_point:
-                            return net, end_points
-
-            net = slim.batch_norm(net)
-            net = tf.nn.relu(net)
-
-            return net, end_points
+            return net
 
 
 def add_block(_input, growth_rate_k, num_layer, bc_mode):
@@ -145,76 +120,27 @@ def densenet_169(inputs,
                  num_classes=1000,
                  is_training=True,
                  dropout_keep_prob=0.8,
-                 prediction_fn=slim.softmax,
-                 spatial_squeeze=True,
                  reuse=None,
-                 scope='DenseNet_169',
-                 global_pool=False):
-    """Defines the densenet_169 architecture.
+                 scope='DenseNet_169'):
 
-    This architecture is defined in:
-
-      Densely Connected Convolutional Networks
-      Gao Huang, Zhuang Liu, Laurens van der Maaten
-      https://arxiv.org/pdf/1608.06993.pdf.
-
-    The default image size used to train this network is 224x224.
-
-    Args:
-      inputs: a tensor of size [batch_size, height, width, channels].
-      num_classes: number of predicted classes. If 0 or None, the logits layer
-        is omitted and the input features to the logits layer (before dropout)
-        are returned instead.
-      is_training: whether is training or not.
-      dropout_keep_prob: the percentage of activation values that are retained.
-      prediction_fn: a function to get predictions out of logits.
-      spatial_squeeze: if True, logits is of shape [B, C], if false logits is of
-          shape [B, 1, 1, C], where B is batch_size and C is number of classes.
-      reuse: whether or not the network and its variables should be reused. To be
-        able to reuse 'scope' must be given.
-      scope: Optional variable_scope.
-      global_pool: Optional boolean flag to control the avgpooling before the
-        logits layer. If false or unset, pooling is done with a fixed window
-        that reduces default-sized inputs to 1x1, while larger inputs lead to
-        larger outputs. If true, any input size is pooled down to 1x1.
-
-    Returns:
-      net: a Tensor with the logits (pre-softmax activations) if num_classes
-        is a non-zero integer, or the non-dropped-out input to the logits layer
-        if num_classes is 0 or None.
-      end_points: a dictionary from components of the network to the corresponding
-        activation.
-    """
-
-    # Final pooling and prediction
     with tf.variable_scope(scope, 'DenseNet_169', [inputs], reuse=reuse) as scope:
-        with slim.arg_scope([slim.batch_norm, slim.dropout], is_training=is_training):
+        with slim.arg_scope([slim.batch_norm], is_training=is_training):
             with slim.arg_scope([slim.dropout], keep_prob=dropout_keep_prob):
-                net, end_points = densenet_base(inputs,
-                                                growth_rate_k=32,
-                                                block_list=[6, 12, 32, 32],
-                                                scope=scope,
-                                                bc_mode=True)
+                net = densenet_base(inputs, growth_rate_k=32, block_list=[6, 12, 32, 32], scope=scope, bc_mode=True)
 
-                with tf.variable_scope('Logits'):
-                    if global_pool:
-                        # Global average pooling.
-                        net = tf.reduce_mean(net, [1, 2], keepdims=True, name='global_pool')
-                        end_points['global_pool'] = net
-                    else:
-                        # Pooling with a fixed kernel size.
-                        net = slim.avg_pool2d(net, [7, 7], stride=1, scope='AvgPool_0a_7x7')
-                        end_points['AvgPool_0a_7x7'] = net
+                net = slim.batch_norm(net)
+                net = tf.nn.relu(net)
 
-                    if not num_classes:
-                        return net, end_points
-                    logits = slim.conv2d(inputs=net, num_outputs=num_classes, kernel_size=1, scope='Conv2d_0c_1x1')
+                # FC
+                features_total = int(net.get_shape()[-1])
+                net = tf.reshape(net, [-1, features_total])
+                with tf.variable_scope("logits"):
+                    weights = tf.get_variable("weights", shape=[features_total, num_classes],
+                                              nitializer=tf.contrib.layers.xavier_initializer())
+                    bias = tf.get_variable("bias", initializer=tf.constant(0.0, shape=[num_classes]))
+                    logits = tf.matmul(net, weights) + bias
 
-                    if spatial_squeeze:
-                        logits = tf.squeeze(logits, [1, 2], name='SpatialSqueeze')
-                    end_points['Logits'] = logits
-                    end_points['Predictions'] = prediction_fn(logits, scope='Predictions')
-    return logits, end_points
+    return logits
 
 densenet_169.default_image_size = 224
 densenet_169_arg_scope = dense_utils.densenet_arg_scope
