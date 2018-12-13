@@ -69,6 +69,7 @@ def inception_v1_base(inputs,
                 net = slim.max_pool2d(net, [3, 3], stride=2, scope=end_point)
                 end_points[end_point] = net
                 if final_endpoint == end_point: return net, end_points
+
                 end_point = 'Conv2d_2b_1x1'
                 net = slim.conv2d(net, 64, [1, 1], scope=end_point)
                 end_points[end_point] = net
@@ -304,7 +305,6 @@ def inception_v1(inputs,
     with tf.variable_scope(scope, 'InceptionV1', [inputs], reuse=reuse) as scope:
         with slim.arg_scope([slim.batch_norm, slim.dropout],
                             is_training=is_training):
-            from tensorflow.contrib.slim import batch_norm
 
             net, end_points = inception_v1_base(inputs, scope=scope)
             with tf.variable_scope('Logits'):
