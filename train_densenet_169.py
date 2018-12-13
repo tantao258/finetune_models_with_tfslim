@@ -67,19 +67,19 @@ with tf.Session() as sess:
     print("Writing to {}\n".format(out_dir))
 
     # define summary
-    grad_summaries = []
-    for g, v in densenet_169.grads_and_vars:
-        if g is not None:
-            grad_hist_summary = tf.summary.histogram("{}/grad/hist".format(v.name), g)
-            sparsity_summary = tf.summary.scalar("{}/grad/sparsity".format(v.name), tf.nn.zero_fraction(g))
-            grad_summaries.append(grad_hist_summary)
-            grad_summaries.append(sparsity_summary)
-    grad_summaries_merged = tf.summary.merge(grad_summaries)
+    # grad_summaries = []
+    # for g, v in densenet_169.grads_and_vars:
+    #     if g is not None:
+    #         grad_hist_summary = tf.summary.histogram("{}/grad/hist".format(v.name), g)
+    #         sparsity_summary = tf.summary.scalar("{}/grad/sparsity".format(v.name), tf.nn.zero_fraction(g))
+    #         grad_summaries.append(grad_hist_summary)
+    #         grad_summaries.append(sparsity_summary)
+    # grad_summaries_merged = tf.summary.merge(grad_summaries)
     loss_summary = tf.summary.scalar("loss", densenet_169.loss)
     acc_summary = tf.summary.scalar("accuracy", densenet_169.accuracy)
 
     # merge all the train summary
-    train_summary_merged = tf.summary.merge([loss_summary, acc_summary, grad_summaries_merged])
+    train_summary_merged = tf.summary.merge([loss_summary, acc_summary])
     train_summary_writer = tf.summary.FileWriter(os.path.join(out_dir, "summaries", "train"), graph=sess.graph)
     # merge all the dev summary
     val_summary_merged = tf.summary.merge([loss_summary, acc_summary])
