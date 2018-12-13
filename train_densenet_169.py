@@ -63,7 +63,7 @@ densenet_169 = DenseNet_169(num_classes=FLAGS.num_classes,
 
 with tf.Session() as sess:
     timestamp = str(int(time.time()))
-    out_dir = os.path.abspath(os.path.join(os.path.curdir, "runs", "densenet_169 ", timestamp))
+    out_dir = os.path.abspath(os.path.join(os.path.curdir, "runs", "densenet_169", timestamp))
     print("Writing to {}\n".format(out_dir))
 
     # define summary
