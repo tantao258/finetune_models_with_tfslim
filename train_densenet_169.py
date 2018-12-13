@@ -14,8 +14,8 @@ os.environ['CUDA_VISIBLE_DEVICES'] = '0,1,2,3'
 Configuration Part.
 """
 # Parameters
-tf.app.flags.DEFINE_string("train_file", './data/train.txt', "the path of train data")
-tf.app.flags.DEFINE_string("val_file", './data/validation.txt', "the path of val data")
+tf.app.flags.DEFINE_string("train_file", './cifar_data/train.txt', "the path of train data")
+tf.app.flags.DEFINE_string("val_file", './cifar_data/validation.txt', "the path of val data")
 tf.app.flags.DEFINE_float("learning_rate", 0.001, "learn_rate(default:0.001)")
 tf.app.flags.DEFINE_integer("num_epochs", 50, "num_epoches(default:10)")
 tf.app.flags.DEFINE_integer("batch_size", 128, "batch_size(default:128)")
