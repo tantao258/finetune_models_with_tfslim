@@ -30,10 +30,8 @@ slim = tf.contrib.slim
 
 
 def densenet_arg_scope(weight_decay=0.00004,
-                       use_batch_norm=True,
                        batch_norm_decay=0.9997,
                        batch_norm_epsilon=0.001,
-                       activation_fn=tf.nn.relu,
                        batch_norm_updates_collections=tf.GraphKeys.UPDATE_OPS):
     """Defines the default arg scope for densenet models.
 
@@ -60,20 +58,15 @@ def densenet_arg_scope(weight_decay=0.00004,
         # use fused batch norm if possible.
         'fused': None,
     }
-    if use_batch_norm:
-        normalizer_fn = slim.batch_norm
-        normalizer_params = batch_norm_params
-    else:
-        normalizer_fn = None
-        normalizer_params = {}
 
     # Set weight_decay for weights in Conv and FC layers.
     with slim.arg_scope([slim.conv2d, slim.fully_connected],
                         weights_regularizer=slim.l2_regularizer(weight_decay)):
 
-        with slim.arg_scope([slim.conv2d],
+        with slim.arg_scope([slim.batch_norm],
                             weights_initializer=slim.variance_scaling_initializer(),
-                            activation_fn=activation_fn,
-                            normalizer_fn=normalizer_fn,
-                            normalizer_params=normalizer_params) as sc:
+                            decay=batch_norm_decay,
+                            epsilon=batch_norm_epsilon,
+                            updates_collections=batch_norm_updates_collections
+                            ) as sc:
             return sc

@@ -18,8 +18,8 @@ tf.app.flags.DEFINE_string("train_file", './cifar_data/train.txt', "the path of 
 tf.app.flags.DEFINE_string("val_file", './cifar_data/validation.txt', "the path of val data")
 tf.app.flags.DEFINE_float("learning_rate", 0.001, "learn_rate(default:0.001)")
 tf.app.flags.DEFINE_integer("num_epochs", 50, "num_epoches(default:10)")
-tf.app.flags.DEFINE_integer("batch_size", 128, "batch_size(default:128)")
-tf.app.flags.DEFINE_integer("num_classes", 5, "num_classes(default:2)")
+tf.app.flags.DEFINE_integer("batch_size", 3, "batch_size(default:128)")
+tf.app.flags.DEFINE_integer("num_classes", 10, "num_classes(default:2)")
 tf.app.flags.DEFINE_float("keep_prob", 0.8, "dropout_rate(default:0.8)")
 tf.app.flags.DEFINE_integer("evaluate_every", 200, "Evaluate model on dev set after this many steps (default: 100)")
 tf.app.flags.DEFINE_integer("checkpoint_every", 400, "Save model after this many steps (default: 100)")
@@ -119,8 +119,7 @@ with tf.Session() as sess:
                                                            feed_dict={
                                                                 densenet_169.x_input: x_batch_val,
                                                                 densenet_169.y_input: y_batch_val,
-                                                                densenet_169.keep_prob: 1,
-                                                                densenet_169.learning_rate: FLAGS.learning_rate
+                                                                densenet_169.keep_prob: 1
                                                            })
             val_summary_writer.add_summary(dev_summaries, step)
             time_str = datetime.datetime.now().isoformat()

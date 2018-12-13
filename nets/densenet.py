@@ -23,7 +23,6 @@ import tensorflow as tf
 from nets import dense_utils
 
 slim = tf.contrib.slim
-trunc_normal = lambda stddev: tf.truncated_normal_initializer(0.0, stddev)
 
 
 def densenet_base(inputs,
@@ -38,11 +37,9 @@ def densenet_base(inputs,
 
     end_points = {}
     with tf.variable_scope(scope, 'DenseNet', [inputs]):
-        # with slim.arg_scope([slim.conv2d, slim.fully_connected], weights_initializer=trunc_normal(0.01)):
         with slim.arg_scope([slim.conv2d, slim.max_pool2d], stride=1, padding='SAME'):
 
             end_point = 'Conv2d_1a_7x7'
-            from tensorflow.contrib.slim import conv2d
             net = slim.conv2d(inputs, growth_rate_k * 2, [7, 7], stride=2, scope=end_point)
             end_points[end_point] = net
             if final_endpoint == end_point:
@@ -76,6 +73,9 @@ def densenet_base(inputs,
                         if final_endpoint == end_point:
                             return net, end_points
 
+            net = slim.batch_norm(net)
+            net = tf.nn.relu(net)
+
             return net, end_points
 
 
@@ -103,6 +103,12 @@ def add_internal_layer(_input, growth_rate_k, bc_mode):
     return output
 
 
+def conv(_input, out_features, kernel_size, stride=1):
+    output = slim.batch_norm(_input)
+    output = tf.nn.relu(output)
+    return slim.conv2d(inputs=output, num_outputs=out_features, kernel_size=kernel_size, stride=stride)
+
+
 def composite_function(_input, out_features, kernel_size=3):
     """Function from paper H_l that performs:
     - batch normalization
@@ -111,33 +117,14 @@ def composite_function(_input, out_features, kernel_size=3):
     - dropout, if required
     """
     with tf.variable_scope("composite_function"):
-        # BN
-        output = slim.batch_norm(_input)
-        # ReLU
-        output = tf.nn.relu(output)
-        # convolution
-        output = slim.conv2d(inputs=output,
-                             num_outputs=out_features,
-                             kernel_size=kernel_size,
-                             stride=1
-                             )
+        output = conv(_input=_input, out_features=out_features, kernel_size=kernel_size)
         output = slim.dropout(inputs=output)
     return output
 
 
 def bottleneck(_input, out_features):
     with tf.variable_scope("bottleneck"):
-        # BN
-        output = slim.batch_norm(_input)
-        # ReLU
-        output = tf.nn.relu(output)
-
-        # convolution
-        output = slim.conv2d(inputs=output,
-                             num_outputs=out_features,
-                             kernel_size=1,
-                             stride=1
-                             )
+        output = conv(_input=_input, out_features=out_features, kernel_size=1, stride=1)
         output = slim.dropout(inputs=output)
     return output
 
@@ -162,7 +149,7 @@ def densenet_169(inputs,
                  spatial_squeeze=True,
                  reuse=None,
                  scope='DenseNet_169',
-                 global_pool=True):
+                 global_pool=False):
     """Defines the densenet_169 architecture.
 
     This architecture is defined in:
@@ -208,8 +195,6 @@ def densenet_169(inputs,
                                                 block_list=[6, 12, 32, 32],
                                                 scope=scope,
                                                 bc_mode=True)
-                net = slim.batch_norm(net)
-                net = tf.nn.relu(net)
 
                 with tf.variable_scope('Logits'):
                     if global_pool:
@@ -223,10 +208,7 @@ def densenet_169(inputs,
 
                     if not num_classes:
                         return net, end_points
-                    logits = slim.conv2d(net, num_classes, [1, 1],
-                                         activation_fn=None,
-                                         normalizer_fn=None,
-                                         scope='Conv2d_0c_1x1')
+                    logits = slim.conv2d(inputs=net, num_outputs=num_classes, kernel_size=1, scope='Conv2d_0c_1x1')
 
                     if spatial_squeeze:
                         logits = tf.squeeze(logits, [1, 2], name='SpatialSqueeze')
