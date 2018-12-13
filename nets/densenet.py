@@ -120,7 +120,7 @@ def densenet_169(inputs,
                  reuse=None,
                  scope='DenseNet_169'):
 
-    with tf.variable_scope(scope, 'DenseNet_169', [inputs], reuse=reuse) as scope:
+    with tf.variable_scope(scope, reuse=reuse):
         with slim.arg_scope([slim.batch_norm], is_training=is_training):
             with slim.arg_scope([slim.dropout], keep_prob=dropout_keep_prob):
                 net = densenet_base(inputs, growth_rate_k=32, block_list=[6, 12, 32, 32], bc_mode=True)
