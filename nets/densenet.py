@@ -136,7 +136,7 @@ def densenet_169(inputs,
                 net = tf.reshape(net, [-1, features_total])
                 with tf.variable_scope("logits"):
                     weights = tf.get_variable("weights", shape=[features_total, num_classes],
-                                              nitializer=tf.contrib.layers.xavier_initializer())
+                                              initializer=tf.contrib.layers.xavier_initializer())
                     bias = tf.get_variable("bias", initializer=tf.constant(0.0, shape=[num_classes]))
                     logits = tf.matmul(net, weights) + bias
 
