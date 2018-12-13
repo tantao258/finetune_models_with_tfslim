@@ -128,9 +128,11 @@ def densenet_169(inputs,
                 net = slim.batch_norm(net)
                 net = tf.nn.relu(net)
 
+                net = slim.avg_pool2d(net, [7, 7], stride=1, scope='AvgPool_0a_7x7')
+                net = tf.squeeze(net, [1, 2], name='SpatialSqueeze')
+
                 # FC
                 features_total = int(net.get_shape()[-1])
-                net = tf.reshape(net, [-1, features_total])
                 with tf.variable_scope("logits"):
                     weights = tf.get_variable("weights", shape=[features_total, num_classes],
                                               initializer=tf.contrib.layers.xavier_initializer())
