@@ -123,7 +123,7 @@ def densenet_169(inputs,
     with tf.variable_scope(scope, reuse=reuse):
         with slim.arg_scope([slim.batch_norm], is_training=is_training):
             with slim.arg_scope([slim.dropout], keep_prob=dropout_keep_prob):
-                net = densenet_base(inputs, growth_rate_k=12, block_list=[12, 12, 12], bc_mode=True)
+                net = densenet_base(inputs, growth_rate_k=12, block_list=[12, 12, 12, 12], bc_mode=True)
 
                 net = slim.batch_norm(net)
                 net = tf.nn.relu(net)
