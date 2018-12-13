@@ -61,10 +61,10 @@ def densenet_arg_scope(weight_decay=0.00004,
 
     # Set weight_decay for weights in Conv and FC layers.
     with slim.arg_scope([slim.conv2d, slim.fully_connected],
-                        weights_regularizer=slim.l2_regularizer(weight_decay)):
+                        weights_regularizer=slim.l2_regularizer(weight_decay),
+                        weights_initializer=slim.variance_scaling_initializer()):
 
         with slim.arg_scope([slim.batch_norm],
-                            weights_initializer=slim.variance_scaling_initializer(),
                             decay=batch_norm_decay,
                             epsilon=batch_norm_epsilon,
                             updates_collections=batch_norm_updates_collections
