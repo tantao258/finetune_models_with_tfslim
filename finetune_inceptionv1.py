@@ -39,7 +39,7 @@ with tf.device('/cpu:0'):
                                         batch_size=FLAGS.batch_size,
                                         num_classes=FLAGS.num_classes,
                                         shuffle=True,
-                                        img_out_size=inception.inception_v3.default_image_size
+                                        img_out_size=inception.inception_v1.default_image_size
                                         )
 
     val_iterator = ImageDataGenerator(txt_file=FLAGS.val_file,
@@ -47,7 +47,7 @@ with tf.device('/cpu:0'):
                                       batch_size=FLAGS.batch_size,
                                       num_classes=FLAGS.num_classes,
                                       shuffle=False,
-                                      img_out_size=inception.inception_v3.default_image_size
+                                      img_out_size=inception.inception_v1.default_image_size
                                       )
 
     train_next_batch = train_iterator.iterator.get_next()
