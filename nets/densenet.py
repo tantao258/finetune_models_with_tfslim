@@ -21,6 +21,7 @@ from __future__ import print_function
 import tensorflow as tf
 
 slim = tf.contrib.slim
+from tensorflow.contrib.slim import max_pool2d
 
 
 def densenet_base(inputs,
@@ -34,7 +35,7 @@ def densenet_base(inputs,
 
         net = slim.conv2d(inputs, growth_rate_k * 2, [7, 7], stride=2, scope="con_1", reuse=tf.AUTO_REUSE)
 
-        net = slim.max_pool2d(net, [3, 3], stride=2, scope="pool_1", reuse=tf.AUTO_REUSE)
+        net = slim.max_pool2d(net, [3, 3], stride=2, scope="pool_1")
 
         for i, layer_num in enumerate(block_list, start=1):
 
