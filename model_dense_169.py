@@ -27,7 +27,7 @@ class DenseNet_169(object):
 
         with tf.variable_scope("train"):
             self.global_step = tf.Variable(0, name="global_step", trainable=False)
-            optimizer = tf.train.GradientDescentOptimizer(self.learning_rate)
+            optimizer = tf.train.MomentumOptimizer(learning_rate=self.learning_rate, momentum=0.9, use_nesterov=True)
             tower_grads = []
             loss_total = []
             with tf.variable_scope(tf.get_variable_scope()):
