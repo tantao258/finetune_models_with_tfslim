@@ -25,19 +25,19 @@ class InceptionV1(object):
             self.keep_prob = tf.placeholder(tf.float32, name="keep_prob")
 
         # train
-            with arg_scope(inception.inception_v1_arg_scope()):
-                self.logits, _ = inception.inception_v1(self.x_input,
-                                                        num_classes=num_classes,
-                                                        is_training=True,
-                                                        dropout_keep_prob=self.keep_prob)
+        with arg_scope(inception.inception_v1_arg_scope()):
+            self.logits, _ = inception.inception_v1(self.x_input,
+                                                    num_classes=num_classes,
+                                                    is_training=True,
+                                                    dropout_keep_prob=self.keep_prob)
 
         # validation
-            with arg_scope(inception.inception_v1_arg_scope()):
-                self.logits_val, _ = inception.inception_v1(self.x_input,
-                                                            num_classes=num_classes,
-                                                            is_training=False,
-                                                            dropout_keep_prob=self.keep_prob
-                                                            )
+        with arg_scope(inception.inception_v1_arg_scope()):
+            self.logits_val, _ = inception.inception_v1(self.x_input,
+                                                        num_classes=num_classes,
+                                                        is_training=False,
+                                                        dropout_keep_prob=self.keep_prob
+                                                        )
 
         with tf.name_scope("loss"):
             self.loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=self.logits, labels=self.y_input))
