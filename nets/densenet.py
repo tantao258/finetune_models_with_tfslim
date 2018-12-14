@@ -32,9 +32,9 @@ def densenet_base(inputs,
 
     with slim.arg_scope([slim.conv2d, slim.max_pool2d], stride=1, padding='SAME'):
 
-        net = slim.conv2d(inputs, growth_rate_k * 2, [7, 7], stride=2, scope="con_1")
+        net = slim.conv2d(inputs, growth_rate_k * 2, [7, 7], stride=2, scope="con_1", reuse=True)
 
-        net = slim.max_pool2d(net, [3, 3], stride=2, scope="pool_1")
+        net = slim.max_pool2d(net, [3, 3], stride=2, scope="pool_1", reuse=True)
 
         for i, layer_num in enumerate(block_list, start=1):
 
