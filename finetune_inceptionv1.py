@@ -122,20 +122,23 @@ with tf.Session() as sess:
             print("\nEvaluation:")
             # num_batches in one validation
             num_batchs_one_validation = int(num_validarion / FLAGS.batch_size)
+            loss_list = []
             acc_list = []
+
             for i in range(num_batchs_one_validation):
 
                 x_batch_val, y_batch_val = sess.run(val_next_batch)
-                step, dev_summaries, loss, accuracy = sess.run([inceptionv1.global_step, val_summary_merged, inceptionv1.loss, inceptionv1.accuracy],
+                step, dev_summaries, loss, accuracy = sess.run([inceptionv1.global_step, val_summary_merged, inceptionv1.loss_val, inceptionv1.accuracy],
                                                                feed_dict={
                                                                    inceptionv1.x_input: x_batch_val,
                                                                    inceptionv1.y_input: y_batch_val,
                                                                    inceptionv1.keep_prob: 1
                                                                })
+                loss_list.append(loss)
                 acc_list.append(accuracy)
                 val_summary_writer.add_summary(dev_summaries, step)
             time_str = datetime.datetime.now().isoformat()
-            print("{}: step: {}, loss: {:g}, acc: {:g}".format(time_str, step, loss, np.mean(acc_list)))
+            print("{}: step: {}, loss: {:g}, acc: {:g}".format(time_str, step, np.mean(loss_list), np.mean(acc_list)))
             print("\n")
 
         if current_step % FLAGS.checkpoint_every == 0:
@@ -145,5 +148,5 @@ with tf.Session() as sess:
         step += 1
 
         # break conditon
-        #if accuracy > 0.95:
-        #exit()
+        if current_step == 1600:
+            exit()
