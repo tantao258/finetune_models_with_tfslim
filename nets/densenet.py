@@ -39,12 +39,12 @@ def densenet_base(inputs,
 
         for i, layer_num in enumerate(block_list, start=1):
 
-            with tf.variable_scope("Block_%d" % i):
+            with tf.variable_scope("Block_%d" % i, reuse=tf.AUTO_REUSE):
                 net = add_block(net, growth_rate_k, layer_num, bc_mode)
 
             # last block exist without transition layer
             if i != len(block_list) - 1:
-                with tf.variable_scope("Transition_%d" % i):
+                with tf.variable_scope("Transition_%d" % i, reuse=tf.AUTO_REUSE):
                     net = transition_layer(net, reduction)
 
         return net
@@ -128,7 +128,7 @@ def densenet_169(inputs,
                             updates_collections=tf.GraphKeys.UPDATE_OPS):
             with slim.arg_scope([slim.dropout], keep_prob=dropout_keep_prob):
 
-                with tf.variable_scope(scope, reuse=reuse):
+                with tf.variable_scope(scope, reuse=tf.AUTO_REUSE):
 
                     net = densenet_base(inputs, growth_rate_k=12, block_list=[6, 12, 32, 32], bc_mode=True)
 
