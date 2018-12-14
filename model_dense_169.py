@@ -25,7 +25,7 @@ class DenseNet_169(object):
                 self.keep_prob = tf.placeholder(tf.float32, name="keep_prob")
                 self.learning_rate = tf.placeholder(tf.float32, name="learning_rate")
 
-        with tf.name_scope("train"):
+        with tf.variable_scope("train"):
             self.global_step = tf.Variable(0, name="global_step", trainable=False)
             optimizer = tf.train.GradientDescentOptimizer(self.learning_rate)
             tower_grads = []
