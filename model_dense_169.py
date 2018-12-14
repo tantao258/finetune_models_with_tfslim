@@ -68,7 +68,7 @@ class DenseNet_169(object):
                 self.probability = tf.nn.softmax(logits_val, name="probability")
 
             with tf.name_scope("prediction"):
-                self.prediction = tf.argmax(self.logits_val, 1, name="prediction")
+                self.prediction = tf.argmax(logits_val, 1, name="prediction")
 
             with tf.name_scope("accuracy"):
                 correct_prediction = tf.equal(self.prediction, tf.argmax(self.y_input, 1))

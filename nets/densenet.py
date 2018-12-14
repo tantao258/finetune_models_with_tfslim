@@ -33,18 +33,18 @@ def densenet_base(inputs,
 
     with slim.arg_scope([slim.conv2d, slim.max_pool2d], stride=1, padding='SAME'):
 
-        net = slim.conv2d(inputs, growth_rate_k * 2, [7, 7], stride=2, scope="con_1", reuse=tf.AUTO_REUSE)
+        net = slim.conv2d(inputs, growth_rate_k * 2, [7, 7], stride=2, scope="con_1")
 
         net = slim.max_pool2d(net, [3, 3], stride=2, scope="pool_1")
 
         for i, layer_num in enumerate(block_list, start=1):
 
-            with tf.variable_scope("Block_%d" % i, reuse=tf.AUTO_REUSE):
+            with tf.variable_scope("Block_%d" % i):
                 net = add_block(net, growth_rate_k, layer_num, bc_mode)
 
             # last block exist without transition layer
             if i != len(block_list) - 1:
-                with tf.variable_scope("Transition_%d" % i, reuse=tf.AUTO_REUSE):
+                with tf.variable_scope("Transition_%d" % i):
                     net = transition_layer(net, reduction)
 
         return net
@@ -116,7 +116,7 @@ def densenet_169(inputs,
                  num_classes=1000,
                  is_training=True,
                  dropout_keep_prob=0.8,
-                 reuse=None,
+                 reuse=tf.AUTO_REUSE,
                  scope='DenseNet_169'):
     with slim.arg_scope([slim.conv2d, slim.fully_connected],
                         weights_regularizer=slim.l2_regularizer(0.00004),
@@ -128,7 +128,7 @@ def densenet_169(inputs,
                             updates_collections=tf.GraphKeys.UPDATE_OPS):
             with slim.arg_scope([slim.dropout], keep_prob=dropout_keep_prob):
 
-                with tf.variable_scope(scope, reuse=tf.AUTO_REUSE):
+                with tf.variable_scope(scope, reuse=reuse):
 
                     net = densenet_base(inputs, growth_rate_k=12, block_list=[6, 12, 32, 32], bc_mode=True)
 
