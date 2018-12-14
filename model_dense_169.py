@@ -2,7 +2,6 @@ import tensorflow as tf
 from nets import densenet
 from utils import _load_initial_weights
 from utils import average_gradients
-from tensorflow.contrib.slim import arg_scope
 
 
 class DenseNet_169(object):
