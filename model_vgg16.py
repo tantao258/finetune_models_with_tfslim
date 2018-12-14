@@ -5,7 +5,7 @@ from tensorflow.contrib.slim import arg_scope
 
 
 class Vgg16(object):
-    def __init__(self, num_classes, train_layers=None, learning_rate=0.001, model="train", weights_path='DEFAULT'):
+    def __init__(self, num_classes, train_layers=None, weights_path='DEFAULT'):
 
         """Create the graph of the vgg16 model.
         """
@@ -21,26 +21,30 @@ class Vgg16(object):
             self.image_size = vgg.vgg_16.default_image_size
             self.x_input = tf.placeholder(tf.float32, [None, self.image_size, self.image_size, 3], name="x_input")
             self.y_input = tf.placeholder(tf.float32, [None, num_classes], name="y_input")
+            self.learning_rate = tf.placeholder(tf.float32, name="learning_rate")
             self.keep_prob = tf.placeholder(tf.float32, name="keep_prob")
 
-        if model == "train" or model == "val":
-            with arg_scope(vgg.vgg_arg_scope()):
-                self.logits, _ = vgg.vgg_16(self.x_input,
-                                            num_classes=num_classes,
-                                            is_training=True,
-                                            dropout_keep_prob=self.keep_prob
-                                            )
+        # train
+        with arg_scope(vgg.vgg_arg_scope()):
+            self.logits, _ = vgg.vgg_16(self.x_input,
+                                        num_classes=num_classes,
+                                        is_training=True,
+                                        reuse=tf.AUTO_REUSE,
+                                        dropout_keep_prob=self.keep_prob
+                                        )
 
-        if model == "test":
-            with arg_scope(vgg.vgg_arg_scope()):
-                self.logits, _ = vgg.vgg_16(self.x_input,
+        # validation
+        with arg_scope(vgg.vgg_arg_scope()):
+            self.logits_val, _ = vgg.vgg_16(self.x_input,
                                             num_classes=num_classes,
                                             is_training=False,
+                                            reuse=tf.AUTO_REUSE,
                                             dropout_keep_prob=self.keep_prob
                                             )
 
         with tf.name_scope("loss"):
             self.loss = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=self.logits, labels=self.y_input))
+            self.loss_val = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits_v2(logits=self.logits_val, labels=self.y_input))
 
         with tf.name_scope("train"):
 
@@ -50,16 +54,16 @@ class Vgg16(object):
             var_list = [v for v in tf.trainable_variables() if v.name.split('/')[-2] in train_layers or v.name.split('/')[-3] in train_layers ]
             gradients = tf.gradients(self.loss, var_list)
             self.grads_and_vars = list(zip(gradients, var_list))
-            optimizer = tf.train.GradientDescentOptimizer(learning_rate)
+            optimizer = tf.train.GradientDescentOptimizer(self.learning_rate)
 
             with tf.control_dependencies(update_ops):
                 self.train_op = optimizer.apply_gradients(grads_and_vars=self.grads_and_vars, global_step=self.global_step)
 
         with tf.name_scope("probability"):
-            self.probability = tf.nn.softmax(self.logits, name="probability")
+            self.probability = tf.nn.softmax(self.logits_val, name="probability")
 
         with tf.name_scope("prediction"):
-            self.prediction = tf.argmax(self.logits, 1, name="prediction")
+            self.prediction = tf.argmax(self.logits_val, 1, name="prediction")
 
         with tf.name_scope("accuracy"):
             correct_prediction = tf.equal(self.prediction, tf.argmax(self.y_input, 1))

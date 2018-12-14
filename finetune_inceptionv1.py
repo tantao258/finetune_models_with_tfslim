@@ -25,8 +25,8 @@ tf.app.flags.DEFINE_integer("evaluate_every", 200, "Evaluate model on dev set af
 tf.app.flags.DEFINE_integer("checkpoint_every", 400, "Save model after this many steps (default: 100)")
 tf.app.flags.DEFINE_integer("num_checkpoints", 3, "num_checkpoints(default:3)")
 FLAGS = tf.app.flags.FLAGS
+num_validation = 10000
 train_layers = ["Conv2d_0c_1x1"]
-num_validarion = 10000
 
 """
 Main Part of the finetuning Script.
@@ -121,7 +121,7 @@ with tf.Session() as sess:
         if current_step % FLAGS.evaluate_every == 0:
             print("\nEvaluation:")
             # num_batches in one validation
-            num_batchs_one_validation = int(num_validarion / FLAGS.batch_size)
+            num_batchs_one_validation = int(num_validation / FLAGS.batch_size)
             loss_list = []
             acc_list = []
 

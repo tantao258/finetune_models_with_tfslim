@@ -149,6 +149,7 @@ def vgg_16(inputs,
            dropout_keep_prob=0.5,
            spatial_squeeze=True,
            scope='vgg_16',
+           reuse=None,
            fc_conv_padding='VALID',
            global_pool=False):
     """Oxford Net VGG 16-Layers version D Example.
@@ -166,6 +167,8 @@ def vgg_16(inputs,
       spatial_squeeze: whether or not should squeeze the spatial dimensions of the
         outputs. Useful to remove unnecessary dimensions for classification.
       scope: Optional scope for the variables.
+      reuse: whether or not the network and its variables should be reused. To be
+        able to reuse 'scope' must be given.
       fc_conv_padding: the type of padding to use for the fully connected layer
         that is implemented as a convolutional layer. Use 'SAME' padding if you
         are applying the network in a fully convolutional manner and want to
@@ -181,7 +184,7 @@ def vgg_16(inputs,
         or the input to the logits layer (if num_classes is 0 or None).
       end_points: a dict of tensors with intermediate activations.
     """
-    with tf.variable_scope(scope, 'vgg_16', [inputs]) as sc:
+    with tf.variable_scope(scope, 'vgg_16', [inputs], reuse=reuse) as sc:
         end_points_collection = sc.original_name_scope + '_end_points'
         # Collect outputs for conv2d, fully_connected and max_pool2d.
         with slim.arg_scope([slim.conv2d, slim.fully_connected, slim.max_pool2d],
@@ -229,6 +232,7 @@ def vgg_19(inputs,
            dropout_keep_prob=0.5,
            spatial_squeeze=True,
            scope='vgg_19',
+           reuse=None,
            fc_conv_padding='VALID',
            global_pool=False):
     """Oxford Net VGG 19-Layers version E Example.
@@ -246,6 +250,8 @@ def vgg_19(inputs,
       spatial_squeeze: whether or not should squeeze the spatial dimensions of the
         outputs. Useful to remove unnecessary dimensions for classification.
       scope: Optional scope for the variables.
+      reuse: whether or not the network and its variables should be reused. To be
+        able to reuse 'scope' must be given.
       fc_conv_padding: the type of padding to use for the fully connected layer
         that is implemented as a convolutional layer. Use 'SAME' padding if you
         are applying the network in a fully convolutional manner and want to
@@ -262,7 +268,7 @@ def vgg_19(inputs,
         None).
       end_points: a dict of tensors with intermediate activations.
     """
-    with tf.variable_scope(scope, 'vgg_19', [inputs]) as sc:
+    with tf.variable_scope(scope, 'vgg_19', [inputs], reuse=reuse) as sc:
         end_points_collection = sc.original_name_scope + '_end_points'
         # Collect outputs for conv2d, fully_connected and max_pool2d.
         with slim.arg_scope([slim.conv2d, slim.fully_connected, slim.max_pool2d],

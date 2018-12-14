@@ -1,5 +1,6 @@
 import os
 import time
+import numpy as np
 import datetime
 import tensorflow as tf
 from nets import resnet_v1
@@ -24,7 +25,9 @@ tf.app.flags.DEFINE_integer("evaluate_every", 200, "Evaluate model on dev set af
 tf.app.flags.DEFINE_integer("checkpoint_every", 400, "Save model after this many steps (default: 100)")
 tf.app.flags.DEFINE_integer("num_checkpoints", 3, "num_checkpoints(default:3)")
 FLAGS = tf.app.flags.FLAGS
+num_validation = 10000
 train_layers = ["logits"]
+
 
 """
 Main Part of the finetuning Script.
@@ -54,9 +57,7 @@ with tf.device('/cpu:0'):
 
 # Initialize model
 resnetv1_50 = ResNetv1_50(num_classes=FLAGS.num_classes,
-                          train_layers=train_layers,
-                          learning_rate=FLAGS.learning_rate,
-                          model="train"
+                          train_layers=train_layers
                           )
 
 with tf.Session() as sess:
@@ -101,13 +102,14 @@ with tf.Session() as sess:
     print("run the tensorboard in terminal: \ntensorboard --logdir={} --port=6006 \n".format(out_dir))
 
     while True:
+        step = 0
         # train loop
         x_batch_train, y_batch_train = sess.run(train_next_batch)
         _, step, train_summaries, loss, accuracy = sess.run([resnetv1_50.train_op, resnetv1_50.global_step, train_summary_merged, resnetv1_50.loss, resnetv1_50.accuracy],
                                                             feed_dict={
                                                                 resnetv1_50.x_input: x_batch_train,
                                                                 resnetv1_50.y_input: y_batch_train,
-                                                                resnetv1_50.keep_prob: FLAGS.keep_prob
+                                                                resnetv1_50.learning_rate: FLAGS.learning_rate
                                                             })
         train_summary_writer.add_summary(train_summaries, step)
         time_str = datetime.datetime.now().isoformat()
@@ -118,22 +120,32 @@ with tf.Session() as sess:
 
         if current_step % FLAGS.evaluate_every == 0:
             print("\nEvaluation:")
-            x_batch_val, y_batch_val = sess.run(val_next_batch)
-            step, dev_summaries, loss, accuracy = sess.run([resnetv1_50.global_step, val_summary_merged, resnetv1_50.loss, resnetv1_50.accuracy],
-                                                           feed_dict={
-                                                               resnetv1_50.x_input: x_batch_val,
-                                                               resnetv1_50.y_input: y_batch_val,
-                                                               resnetv1_50.keep_prob: 1
-                                                           })
-            val_summary_writer.add_summary(dev_summaries, step)
+            # num_batches in one validation
+            num_batchs_one_validation = int(num_validation / FLAGS.batch_size)
+            loss_list = []
+            acc_list = []
+
+            for i in range(num_batchs_one_validation):
+
+                x_batch_val, y_batch_val = sess.run(val_next_batch)
+                step, dev_summaries, loss, accuracy = sess.run([resnetv1_50.global_step, val_summary_merged, resnetv1_50.loss_val, resnetv1_50.accuracy],
+                                                               feed_dict={
+                                                                   resnetv1_50.x_input: x_batch_val,
+                                                                   resnetv1_50.y_input: y_batch_val,
+                                                               })
+                loss_list.append(loss)
+                acc_list.append(accuracy)
+                val_summary_writer.add_summary(dev_summaries, step)
             time_str = datetime.datetime.now().isoformat()
-            print("{}: step: {}, loss: {:g}, acc: {:g}".format(time_str, step, loss, accuracy))
+            print("{}: step: {}, loss: {:g}, acc: {:g}".format(time_str, step, np.mean(loss_list), np.mean(acc_list)))
             print("\n")
 
         if current_step % FLAGS.checkpoint_every == 0:
             path = saver.save(sess, checkpoint_prefix, global_step=current_step)
             print("Saved model checkpoint to {}\n".format(path))
 
+        step += 1
+
         # break conditon
-        #if accuracy > 0.95:
-        #exit()
+        if current_step == 1600:
+            exit()
