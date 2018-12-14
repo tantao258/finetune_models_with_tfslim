@@ -17,19 +17,18 @@ tf.app.flags.DEFINE_string("train_file", './cifar_data/train.txt', "the path of 
 tf.app.flags.DEFINE_string("val_file", './cifar_data/validation.txt', "the path of val data")
 tf.app.flags.DEFINE_float("learning_rate", 0.1, "learn_rate(default:0.001)")
 tf.app.flags.DEFINE_integer("num_epochs", 500, "num_epoches(default:10)")
-tf.app.flags.DEFINE_integer("batch_size", 128, "batch_size(default:128)")
+tf.app.flags.DEFINE_integer("train_batch_size", 128, "batch_size(default:128)")
+tf.app.flags.DEFINE_integer("val_batch_size", 1000, "batch_size(default:128)")
 tf.app.flags.DEFINE_integer("num_classes", 10, "num_classes(default:2)")
 tf.app.flags.DEFINE_float("keep_prob", 0.8, "dropout_rate(default:0.8)")
-tf.app.flags.DEFINE_integer("evaluate_every", 200, "Evaluate model on dev set after this many steps (default: 100)")
-tf.app.flags.DEFINE_integer("checkpoint_every", 400, "Save model after this many steps (default: 100)")
+tf.app.flags.DEFINE_integer("evaluate_every", 1200, "Evaluate model on dev set after this many steps (default: 100)")
+tf.app.flags.DEFINE_integer("checkpoint_every", 2400, "Save model after this many steps (default: 100)")
 tf.app.flags.DEFINE_integer("num_checkpoints", 3, "num_checkpoints(default:3)")
 FLAGS = tf.app.flags.FLAGS
 # training model with no pre_model, train_layer=[]
 train_layers = []
 num_train = 50000
 num_val = 10000
-num_batches_train = int(num_train / FLAGS.batch_size)
-num_batches_val = int(num_val / 256)
 
 
 """
@@ -96,16 +95,20 @@ with tf.device('/cpu:0'):
         saver = tf.train.Saver(tf.global_variables(), max_to_keep=FLAGS.num_checkpoints)
 
         sess.run(tf.global_variables_initializer())
+        learning_rate = FLAGS.learning_rate
 
-        while True:
+        for step in range(100000000000000000000):
             # train loop
+            if step == FLAGS.train_batch_size * FLAGS.num_epochs * 0.5 or step == FLAGS.train_batch_size * FLAGS.num_epochs * 0.75:
+                learning_rate = learning_rate / 10
+
             x_batch_train, y_batch_train = sess.run(train_next_batch)
             _, step, train_summaries, loss, accuracy = sess.run([densenet_169.train_op, densenet_169.global_step, train_summary_merged, densenet_169.loss, densenet_169.accuracy],
                                                                 feed_dict={
                                                                     densenet_169.x_input: x_batch_train,
                                                                     densenet_169.y_input: y_batch_train,
                                                                     densenet_169.keep_prob: FLAGS.keep_prob,
-                                                                    densenet_169.learning_rate: FLAGS.learning_rate
+                                                                    densenet_169.learning_rate: learning_rate
                                                                           }
                                                                )
             train_summary_writer.add_summary(train_summaries, step)
@@ -117,9 +120,9 @@ with tf.device('/cpu:0'):
 
             if current_step % FLAGS.evaluate_every == 0:
                 print("\nEvaluation:")
-                accuracy_list = []
-                for i in range(int(num_val / 10)):
 
+                accuracy_list = []
+                for i in range(int(num_val / FLAGS.val_batch_size)):
                     x_batch_val, y_batch_val = sess.run(val_next_batch)
 
                     step, dev_summaries, accuracy = sess.run([densenet_169.global_step, val_summary_merged, densenet_169.accuracy],
