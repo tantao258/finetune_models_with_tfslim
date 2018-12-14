@@ -32,7 +32,7 @@ with tf.device('/cpu:0'):
 
 
 # Initialize model
-inceptionv1 = InceptionV1(num_classes=FLAGS.num_classes)
+inceptionv1 = InceptionV1(num_classes=FLAGS.num_classes, train_layers=train_layers)
 
 
 with tf.Session() as sess:
