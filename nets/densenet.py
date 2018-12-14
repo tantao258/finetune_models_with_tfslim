@@ -119,27 +119,35 @@ def densenet_169(inputs,
                  dropout_keep_prob=0.8,
                  reuse=None,
                  scope='DenseNet_169'):
-
-    with tf.variable_scope(scope, reuse=reuse):
-        with slim.arg_scope([slim.batch_norm], is_training=is_training):
+    with slim.arg_scope([slim.conv2d, slim.fully_connected],
+                        weights_regularizer=slim.l2_regularizer(0.00004),
+                        weights_initializer=slim.variance_scaling_initializer()):
+        with slim.arg_scope([slim.batch_norm],
+                            decay=0.9997,
+                            epsilon=0.001,
+                            is_training=is_training,
+                            updates_collections=tf.GraphKeys.UPDATE_OPS):
             with slim.arg_scope([slim.dropout], keep_prob=dropout_keep_prob):
-                net = densenet_base(inputs, growth_rate_k=12, block_list=[12, 12, 12, 12], bc_mode=True)
 
-                net = slim.batch_norm(net)
-                net = tf.nn.relu(net)
+                with tf.variable_scope(scope, reuse=reuse):
 
-                net = slim.avg_pool2d(net, [7, 7], stride=1, scope='AvgPool_0a_7x7')
-                net = tf.squeeze(net, [1, 2], name='SpatialSqueeze')
+                    net = densenet_base(inputs, growth_rate_k=12, block_list=[12, 12, 12, 12], bc_mode=True)
 
-                # FC
-                features_total = int(net.get_shape()[-1])
-                with tf.variable_scope("logits"):
-                    weights = tf.get_variable("weights", shape=[features_total, num_classes],
-                                              initializer=tf.contrib.layers.xavier_initializer())
-                    bias = tf.get_variable("bias", initializer=tf.constant(0.0, shape=[num_classes]))
-                    logits = tf.matmul(net, weights) + bias
+                    net = slim.batch_norm(net)
+                    net = tf.nn.relu(net)
 
-    return logits
+                    net = slim.avg_pool2d(net, [7, 7], stride=1, scope='AvgPool_0a_7x7')
+                    from tensorflow.contrib.slim import conv2d
+                    net = tf.squeeze(net, [1, 2], name='SpatialSqueeze')
+
+                    # FC
+                    features_total = int(net.get_shape()[-1])
+                    with tf.variable_scope("logits"):
+                        weights = tf.get_variable("weights", shape=[features_total, num_classes],
+                                                  initializer=tf.contrib.layers.xavier_initializer())
+                        bias = tf.get_variable("bias", initializer=tf.constant(0.0, shape=[num_classes]))
+                        logits = tf.matmul(net, weights) + bias
+
+                    return logits
 
 densenet_169.default_image_size = 224
-densenet_169_arg_scope = dense_utils.densenet_arg_scope
