@@ -1,4 +1,5 @@
 import os
+import numpy as np
 import tensorflow as tf
 from nets import resnet_v1
 from model_resnetv1_50 import ResNetv1_50
@@ -13,8 +14,8 @@ Configuration Part.
 tf.app.flags.DEFINE_string("test_file", './data/test.txt', "the path of test data")
 tf.app.flags.DEFINE_integer("batch_size", 128, "batch_size(default:128)")
 tf.app.flags.DEFINE_integer("num_classes", 5, "num_classes(default:2)")
-tf.app.flags.DEFINE_float("test_keep_prob", 1.0, "test_dropout_keep_rate(default:1.0)")
 FLAGS = tf.app.flags.FLAGS
+num_validation = 10000
 train_layers = ["logits"]
 
 # Load data on the cpu
@@ -31,7 +32,7 @@ with tf.device('/cpu:0'):
 
 
 # Initialize model
-resnetv1_50 = ResNetv1_50(num_classes=FLAGS.num_classes, train_layers=train_layers, model="test")
+resnetv1_50 = ResNetv1_50(num_classes=FLAGS.num_classes, train_layers=train_layers)
 
 
 with tf.Session() as sess:
@@ -42,11 +43,14 @@ with tf.Session() as sess:
     model_file = tf.train.latest_checkpoint("./runs/resnetv1_50/1544518158/ckpt/")
     saver.restore(sess, model_file)
 
-    x_batch_test, y_batch_test = sess.run(test_next_batch)
-    accuracy = sess.run(resnetv1_50.accuracy, feed_dict={resnetv1_50.x_input: x_batch_test,
-                                                         resnetv1_50.y_input: y_batch_test,
-                                                         resnetv1_50.keep_prob: FLAGS.test_keep_prob
-                                                         }
-                        )
-    print(accuracy)
+    num_batchs_one_validation = int(num_validation / FLAGS.batch_size)
+    acc_list = []
+    for i in range(num_batchs_one_validation):
+        x_batch_test, y_batch_test = sess.run(test_next_batch)
+        accuracy = sess.run(resnetv1_50.accuracy, feed_dict={resnetv1_50.x_input: x_batch_test,
+                                                             resnetv1_50.y_input: y_batch_test,
+                                                             }
+                            )
+        acc_list.append(accuracy)
+    print("accuracy on test dataSet: {}".format(np.mean(acc_list)))
 

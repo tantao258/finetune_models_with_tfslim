@@ -22,7 +22,6 @@ class ResNetv1_152(object):
             self.x_input = tf.placeholder(tf.float32, [None, self.image_size, self.image_size, 3], name="x_input")
             self.y_input = tf.placeholder(tf.float32, [None, num_classes], name="y_input")
             self.learning_rate = tf.placeholder(tf.float32, name="learning_rate")
-            self.keep_prob = tf.placeholder(tf.float32, name="keep_prob")
 
         # train
         with arg_scope(resnet_v1.resnet_arg_scope()):
