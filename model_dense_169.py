@@ -59,7 +59,7 @@ class DenseNet_169(object):
         with tf.name_scope("loss"):
             self.loss = tf.reduce_mean(loss_total)
 
-        with tf.device("/gpu:0"):
+        with tf.device("/gpu:3"):
 
             logits_val = densenet.densenet_169(self.x_input, num_classes=num_classes, is_training=False,
                                                dropout_keep_prob=1.0)
