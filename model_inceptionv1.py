@@ -29,6 +29,7 @@ class InceptionV1(object):
             self.logits, _ = inception.inception_v1(self.x_input,
                                                     num_classes=num_classes,
                                                     is_training=True,
+                                                    reuse=tf.AUTO_REUSE,
                                                     dropout_keep_prob=self.keep_prob)
 
         # validation
@@ -36,6 +37,7 @@ class InceptionV1(object):
             self.logits_val, _ = inception.inception_v1(self.x_input,
                                                         num_classes=num_classes,
                                                         is_training=False,
+                                                        reuse=tf.AUTO_REUSE,
                                                         dropout_keep_prob=self.keep_prob
                                                         )
 
