@@ -26,6 +26,11 @@ tf.app.flags.DEFINE_integer("num_checkpoints", 3, "num_checkpoints(default:3)")
 FLAGS = tf.app.flags.FLAGS
 # training model with no pre_model, train_layer=[]
 train_layers = []
+num_train = 50000
+num_val = 10000
+num_batches_train = int(num_train / FLAGS.batch_size)
+num_batches_val = int(num_val / 256)
+
 
 """
 Main Part of the training Script.
@@ -44,7 +49,7 @@ with tf.device('/cpu:0'):
 
     val_iterator = ImageDataGenerator(txt_file=FLAGS.val_file,
                                       mode='inference',
-                                      batch_size=10000,
+                                      batch_size=1000,
                                       num_classes=FLAGS.num_classes,
                                       shuffle=False,
                                       img_out_size=densenet.densenet_169.default_image_size
@@ -112,18 +117,23 @@ with tf.device('/cpu:0'):
 
             if current_step % FLAGS.evaluate_every == 0:
                 print("\nEvaluation:")
-                x_batch_val, y_batch_val = sess.run(val_next_batch)
+                accuracy_list = []
+                for i in range(int(num_val / 10)):
 
-                step, dev_summaries, accuracy = sess.run([densenet_169.global_step, val_summary_merged, densenet_169.accuracy],
-                                                         feed_dict={
-                                                                    densenet_169.x_input: x_batch_val,
-                                                                    densenet_169.y_input: y_batch_val,
-                                                                    densenet_169.keep_prob: 1
-                                                                   }
-                                                        )
-                val_summary_writer.add_summary(dev_summaries, step)
+                    x_batch_val, y_batch_val = sess.run(val_next_batch)
+
+                    step, dev_summaries, accuracy = sess.run([densenet_169.global_step, val_summary_merged, densenet_169.accuracy],
+                                                             feed_dict={
+                                                                        densenet_169.x_input: x_batch_val,
+                                                                        densenet_169.y_input: y_batch_val,
+                                                                        densenet_169.keep_prob: 1
+                                                                       }
+                                                            )
+                    accuracy_list.append(accuracy)
+                    val_summary_writer.add_summary(dev_summaries, step)
                 time_str = datetime.datetime.now().isoformat()
-                print("{}: step: {}, loss: {:g}, acc: {:g}".format(time_str, step, loss, accuracy))
+                import numpy as np
+                print("{}: step: {}, loss: {:g}, acc: {:g}".format(time_str, step, loss, np.mean(accuracy_list)))
                 print("\n")
 
             if current_step % FLAGS.checkpoint_every == 0:
