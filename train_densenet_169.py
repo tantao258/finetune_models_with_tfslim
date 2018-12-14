@@ -44,7 +44,7 @@ with tf.device('/cpu:0'):
 
     val_iterator = ImageDataGenerator(txt_file=FLAGS.val_file,
                                       mode='inference',
-                                      batch_size=FLAGS.batch_size,
+                                      batch_size=10000,
                                       num_classes=FLAGS.num_classes,
                                       shuffle=False,
                                       img_out_size=densenet.densenet_169.default_image_size
