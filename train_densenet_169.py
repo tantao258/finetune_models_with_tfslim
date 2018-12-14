@@ -17,8 +17,7 @@ tf.app.flags.DEFINE_string("train_file", './cifar_data/train.txt', "the path of 
 tf.app.flags.DEFINE_string("val_file", './cifar_data/validation.txt', "the path of val data")
 tf.app.flags.DEFINE_float("learning_rate", 0.1, "learn_rate(default:0.001)")
 tf.app.flags.DEFINE_integer("num_epochs", 500, "num_epoches(default:10)")
-tf.app.flags.DEFINE_integer("train_batch_size", 128, "batch_size(default:128)")
-tf.app.flags.DEFINE_integer("val_batch_size", 1000, "batch_size(default:128)")
+tf.app.flags.DEFINE_integer("batch_size", 128, "batch_size(default:128)")
 tf.app.flags.DEFINE_integer("num_classes", 10, "num_classes(default:2)")
 tf.app.flags.DEFINE_float("keep_prob", 0.8, "dropout_rate(default:0.8)")
 tf.app.flags.DEFINE_integer("evaluate_every", 1200, "Evaluate model on dev set after this many steps (default: 100)")
@@ -40,7 +39,7 @@ print("Loading data...")
 with tf.device('/cpu:0'):
     train_iterator = ImageDataGenerator(txt_file=FLAGS.train_file,
                                         mode='training',
-                                        batch_size=4 * FLAGS.train_batch_size,
+                                        batch_size=4 * FLAGS.batch_size,
                                         num_classes=FLAGS.num_classes,
                                         shuffle=True,
                                         img_out_size=densenet.densenet_169.default_image_size
@@ -48,7 +47,7 @@ with tf.device('/cpu:0'):
 
     val_iterator = ImageDataGenerator(txt_file=FLAGS.val_file,
                                       mode='inference',
-                                      batch_size=FLAGS.val_batch_size,
+                                      batch_size=1000,
                                       num_classes=FLAGS.num_classes,
                                       shuffle=False,
                                       img_out_size=densenet.densenet_169.default_image_size
@@ -59,7 +58,7 @@ with tf.device('/cpu:0'):
 
 
 # Initialize model
-densenet_169 = DenseNet_169(num_classes=FLAGS.num_classes, batch_size=FLAGS.train_batch_size, train_layers=train_layers)
+densenet_169 = DenseNet_169(num_classes=FLAGS.num_classes, batch_size=FLAGS.batch_size, train_layers=train_layers)
 
 
 with tf.device('/cpu:0'):
@@ -97,9 +96,12 @@ with tf.device('/cpu:0'):
         sess.run(tf.global_variables_initializer())
         learning_rate = FLAGS.learning_rate
 
-        for step in range(100000000000000000000):
+        while True:
+            step = 0
             # train loop
-            if step == FLAGS.train_batch_size * FLAGS.num_epochs * 0.5 or step == FLAGS.train_batch_size * FLAGS.num_epochs * 0.75:
+            if step == (FLAGS.num_epochs * 0.5) * (int(0.25 * num_train / FLAGS.batch_size)):
+                learning_rate = learning_rate / 10
+            if step == (FLAGS.num_epochs * 0.75) * (int(0.25 * num_train / FLAGS.batch_size)):
                 learning_rate = learning_rate / 10
 
             x_batch_train, y_batch_train = sess.run(train_next_batch)
@@ -142,3 +144,5 @@ with tf.device('/cpu:0'):
             if current_step % FLAGS.checkpoint_every == 0:
                 path = saver.save(sess, checkpoint_prefix, global_step=current_step)
                 print("Saved model checkpoint to {}\n".format(path))
+
+            step += 1
