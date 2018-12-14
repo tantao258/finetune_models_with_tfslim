@@ -40,7 +40,7 @@ print("Loading data...")
 with tf.device('/cpu:0'):
     train_iterator = ImageDataGenerator(txt_file=FLAGS.train_file,
                                         mode='training',
-                                        batch_size=FLAGS.batch_size,
+                                        batch_size=FLAGS.train_batch_size,
                                         num_classes=FLAGS.num_classes,
                                         shuffle=True,
                                         img_out_size=densenet.densenet_169.default_image_size
@@ -48,7 +48,7 @@ with tf.device('/cpu:0'):
 
     val_iterator = ImageDataGenerator(txt_file=FLAGS.val_file,
                                       mode='inference',
-                                      batch_size=1000,
+                                      batch_size=FLAGS.val_batch_size,
                                       num_classes=FLAGS.num_classes,
                                       shuffle=False,
                                       img_out_size=densenet.densenet_169.default_image_size
